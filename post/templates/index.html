@@ -4,6 +4,21 @@
     <meta charset="UTF-8">
     <title>Edu-File</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <style>
+        .btn.liked {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .comment {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .comment b {
+            color: #2c5f7c;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -99,8 +114,12 @@
 
             <div class="post-card" data-post-id="{{ post.id }}">
                 <div class="interactions">
-                    <button class="btn" onclick="likePost(this)">👍 <span class="like-count">0</span></button>
-                    <button class="btn" onclick="toggleCommentBox(this)">💬 <span class="comment-count">0</span></button>
+                    <button class="btn {% if post.user_liked %}liked{% endif %}" onclick="likePost(this)">
+                        👍 <span class="like-count">{{ post.like_count }}</span>
+                    </button>
+                    <button class="btn" onclick="toggleCommentBox(this)">
+                        💬 <span class="comment-count">{{ post.comment_count }}</span>
+                    </button>
                 </div>
 
                 <div class="comment-box hidden">
@@ -108,7 +127,7 @@
                     <button class="btn btn-primary" onclick="addComment(this)">โพสต์</button>
                 </div>
 
-                <div class="comment-list"></div>
+                <div class="comment-list" style="display:none;"></div>
             </div>
         </div>
         {% endfor %}
@@ -140,86 +159,128 @@
       }
     });
 
-    // ส่วนคอมเมนต์และไลค์
-    const currentUser = "{{ user }}";
-
-    document.querySelectorAll(".post-card").forEach(postCard => {
-      const postId = postCard.dataset.postId;
-
-      let likes = JSON.parse(localStorage.getItem("likes_" + postId)) || 0;
-      const likeCount = postCard.querySelector(".like-count");
-      likeCount.innerText = likes;
-
-      const savedComments = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-      const commentList = postCard.querySelector(".comment-list");
-      const commentCount = postCard.querySelector(".comment-count");
-      commentCount.innerText = savedComments.length;
-
-      savedComments.forEach(text => {
-        const p = document.createElement("p");
-        p.className = "comment";
-        p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-        commentList.appendChild(p);
-      });
-    });
-
-    function toggleCommentBox(button) {
+    // ฟังก์ชันกดไลค์ - เชื่อมต่อกับ database
+    async function likePost(button) {
       const postCard = button.closest(".post-card");
+      const postId = postCard.dataset.postId;
+      
+      button.disabled = true; // ป้องกันกดซ้ำ
+      
+      try {
+        const response = await fetch(`/api/like/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          const likeCount = button.querySelector(".like-count");
+          likeCount.innerText = data.like_count;
+          
+          // เปลี่ยนสีปุ่มตามสถานะไลค์
+          if (data.liked) {
+            button.classList.add("liked");
+          } else {
+            button.classList.remove("liked");
+          }
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการกดไลค์');
+      } finally {
+        button.disabled = false;
+      }
+    }
+
+    // ฟังก์ชันแสดง/ซ่อนคอมเมนต์
+    async function toggleCommentBox(button) {
+      const postCard = button.closest(".post-card");
+      const postId = postCard.dataset.postId;
       const commentBox = postCard.querySelector(".comment-box");
       const commentList = postCard.querySelector(".comment-list");
 
       commentBox.classList.toggle("hidden");
 
+      // ถ้ากำลังจะแสดงคอมเมนต์ ให้โหลดจาก database
       if (commentList.style.display === "none" || commentList.style.display === "") {
+        await loadComments(postId, commentList);
         commentList.style.display = "block";
       } else {
         commentList.style.display = "none";
       }
     }
 
-    function likePost(button) {
-      const postCard = button.closest(".post-card");
-      const postId = postCard.dataset.postId;
-      const likeCount = button.querySelector(".like-count");
-      let count = parseInt(likeCount.innerText) || 0;
-
-      if (button.classList.contains("liked")) {
-        count--;
-        button.classList.remove("liked");
-      } else {
-        count++;
-        button.classList.add("liked");
+    // ฟังก์ชันโหลดคอมเมนต์จาก database - แสดงชื่อ user ที่คอมเมนต์
+    async function loadComments(postId, commentList) {
+      try {
+        const response = await fetch(`/api/comments/${postId}`);
+        const data = await response.json();
+        
+        if (data.success) {
+          commentList.innerHTML = ''; // ล้างคอมเมนต์เก่า
+          
+          data.comments.forEach(comment => {
+            const p = document.createElement("p");
+            p.className = "comment";
+            // แสดงชื่อ user ที่คอมเมนต์จริงๆ จาก database
+            p.innerHTML = `<b>${comment.username}:</b> <span class="comment-text">${comment.text}</span>`;
+            commentList.appendChild(p);
+          });
+        }
+      } catch (error) {
+        console.error('Error loading comments:', error);
       }
-
-      likeCount.innerText = count;
-      localStorage.setItem("likes_" + postId, count);
     }
 
-    function addComment(button) {
+    // ฟังก์ชันเพิ่มคอมเมนต์ - บันทึกลง database พร้อมชื่อ user
+    async function addComment(button) {
       const postCard = button.closest(".post-card");
       const postId = postCard.dataset.postId;
       const input = postCard.querySelector("input");
       const text = input.value.trim();
+      
       if (text === "") return;
-
-      const commentList = postCard.querySelector(".comment-list");
-      const p = document.createElement("p");
-      p.className = "comment";
-      p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-      commentList.appendChild(p);
-
-      input.value = "";
-
-      const commentCount = postCard.querySelector(".comment-count");
-      let count = parseInt(commentCount.innerText) || 0;
-      count++;
-      commentCount.innerText = count;
-
-      const saved = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-      saved.push(text);
-      localStorage.setItem("comments_" + postId, JSON.stringify(saved));
-
-      commentList.style.display = "block";
+      
+      button.disabled = true; // ป้องกันกดซ้ำ
+      
+      try {
+        const response = await fetch(`/api/comment/${postId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ text: text })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // เพิ่มคอมเมนต์ใหม่ใน UI พร้อมชื่อ user ที่คอมเมนต์
+          const commentList = postCard.querySelector(".comment-list");
+          const p = document.createElement("p");
+          p.className = "comment";
+          p.innerHTML = `<b>${data.username}:</b> <span class="comment-text">${data.text}</span>`;
+          commentList.appendChild(p);
+          
+          // อัพเดทจำนวนคอมเมนต์
+          const commentCount = postCard.querySelector(".comment-count");
+          commentCount.innerText = data.comment_count;
+          
+          // ล้าง input
+          input.value = "";
+          
+          // แสดง comment list
+          commentList.style.display = "block";
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการเพิ่มคอมเมนต์');
+      } finally {
+        button.disabled = false;
+      }
     }
     </script>
 </body>
