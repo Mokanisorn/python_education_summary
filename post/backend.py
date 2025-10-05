@@ -313,6 +313,42 @@ def subject_page(category):
 def sub():
     return render_template('subject.html', user=session.get('user'))
 
+@app.route('/math')
+def math():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("math.html", user=session["user"])
+
+@app.route('/physics')
+def physics():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("physics.html", user=session["user"])
+
+@app.route('/biology')
+def biology():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("biology.html", user=session["user"])
+
+@app.route('/chemistry')
+def chemistry():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("chemistry.html", user=session["user"])
+
+@app.route('/history')
+def history():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("history.html", user=session["user"])
+
+@app.route('/thai')
+def thai():
+    if "user" not in session:
+        return redirect(url_for('login'))
+    return render_template("thai.html", user=session["user"])
+
 @app.route("/logout")
 def logout():
     session.clear()
