@@ -313,6 +313,10 @@ def subject_page(category):
 def sub():
     return render_template('subject.html', user=session.get('user'))
 
+@app.route('/set')
+def set():
+    return render_template('set.html', user=session.get('user'))
+
 @app.route('/math')
 def math():
     if "user" not in session:

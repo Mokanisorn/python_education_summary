@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Setting</title>
+    <link rel="stylesheet" href="/static/setting.css">
+</head>
+<body class="setting-bg">
+<nav class="navbar">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">   
+                <span style="position:relative; left: -6px;">HOME</span>
+            </a>
+            <a href="{{ url_for('sub') }}">
+                <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">    
+                <span style="position:relative; left: -16px;">SUBJECT</span>
+            </a>
+            <a href="{{ url_for('set') }}">
+                <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">    
+                <span style="position:relative; left: -5px;">SETTING</span>
+            </a>
+        </div>
+        <div class="user-menu">
+            <i class="fa fa-user"></i> {{ user }}
+        </div>
+    </nav>
+    <div class="container">
+        <h1>Setting</h1>
+        <div class="user-info">
+            <div class="user-info-row">
+                <span class="user-info-label">Username :</span>
+                <span class="user-info-value">{{ current_username }}</span>
+            </div>
+            <div class="user-info-row">
+                <span class="user-info-label">Password :</span>
+                <span class="user-info-value">••••••••</span>
+            </div>
+
+            <form action="/setting" method="post" class="change-info-form">
+                <h2>อัปเดตข้อมูลบัญชี</h2>
+                <div class="user-info-row">
+                    <span class="user-info-label">ชื่อผู้ใช้ใหม่:</span>
+                    <input type="text" name="new_username" value="{{ current_username }}" required>
+                </div>
+                
+                <div class="user-info-row">
+                    <span class="user-info-label">รหัสผ่านปัจจุบัน:</span>
+                    <input type="password" name="current_password" required>
+                </div>
+                <div class="user-info-row">
+                    <span class="user-info-label">รหัสผ่านใหม่:</span>
+                    <input type="password" name="new_password" required>
+                </div>
+                <div class="user-info-row">
+                    <span class="user-info-label">ยืนยันรหัสผ่านใหม่:</span>
+                    <input type="password" name="confirm_password" required>
+                </div>
+
+                <div class="user-info-row" style="justify-content: flex-end; margin-top: 1.5em;">
+                    <button type="submit">บันทึกการเปลี่ยนแปลง</button>
+                </div>
+            </form>
+
+            <form action="/logout" method="get" style="display: flex; justify-content: flex-end; margin-top: 1.5em;">
+                <button type="submit" class="logout-btn">ออกจากระบบ</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>
