@@ -2,221 +2,244 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>Edu-File</title>
-    <link rel="stylesheet" href="/static/sub.css">
+    <title>Biology - Edu-File</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='sub.css') }}">
+    <style>
+        .btn.liked {
+            background-color: #4CAF50!important;
+            color: white !important;
+        }
+        .comment {
+            padding: 8px;
+            margin: 5px 0;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+        .comment b {
+            color: #2c5f7c;
+        }
+    </style>
 </head>
 <body>
     <nav class="navbar">
-    <div class="logo">
-        <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
-    </div>
-    <div class="nav-links">
-        <a href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">   
-        <span style="position:relative; left: -6px;">HOME</span>
-    </a>
-        <a href="{{ url_for('sub') }}">
-    <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">    
-    <span style="position:relative; left: -16px;">SUBJECT</span>
-</a>
+        <div class="logo">
+            <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">   
+                <span style="position:relative; left: -6px;">HOME</span>
+            </a>
+            <a href="{{ url_for('sub') }}">
+                <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">    
+                <span style="position:relative; left: -16px;">SUBJECT</span>
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">    
+                <span style="position:relative; left: -5px;">SETTING</span>
+            </a>
+        </div>
+        <div class="user-menu">
+            <i class="fa fa-user"></i> {{ user }}
+        </div>
+    </nav>
 
-        <a href="#">
-        <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">    
-        <span style="position:relative; left: -5px;">SETTING</span>
-    </a>
+    <!-- Search Bar -->
+    <div class="search-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="ค้นหาโพสต์..." onkeyup="searchPosts()">
+            <span class="search-icon">🔍</span>
+        </div>
     </div>
-    <div class="user-menu">
-<i class="fa fa-user"></i> {{ user }}
-</div>
-   
-</nav>
 
-<!-- Search Bar -->
-<div class="search-container">
-    <div class="search-box">
-        <input type="text" id="searchInput" placeholder="ค้นหาโพสต์..." onkeyup="searchPosts()">
-        <span class="search-icon">🔍</span>
-    </div>
-</div>
-
-<div class="posts">
+    <div class="posts">
         {% for post in posts %}
-        <div class="post" data-post-text="{{ post.text|e }}" data-post-user="{{ user }}">
+        <div class="post" data-post-text="{{ post.text|e }}" data-post-user="{{ post.user }}">
             <div class="post-header">
-    <div class="user-info">
-        <i class="fa fa-user"></i> 
-        <span class="username">{{ user }}</span>
-    </div>
-    
-</div>
-{% if post.category_display %}
-        <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
-        {% endif %}
+                <div class="user-info">
+                    <i class="fa fa-user"></i> 
+                    <span class="username">{{ post.user }}</span>
+                </div>
+            </div>
+
+            {% if post.category_display %}
+            <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
+            {% endif %}
+
             <div class="post-content">
                 <div class="post-text">{{ post.text|e }}</div>
                 {% if post.file %}
-           <div class="post-file">
-    {% if post.file.endswith('.pdf') %}
-        <a href="{{ url_for('static', filename='uploads/' + post.file) }}" target="_blank" class="pdf-card">
-            <div class="pdf-icon">
-                <img src="{{ url_for('static', filename='doc.png') }}" alt=" "style="height:30px; width:30px; vertical-align: middle; margin-right: 1px; margin-top:-1px;">
-            </div>
-            <div class="pdf-info">
-                <p class="pdf-title">{{ post.file.split('_', 1)[1] if '_' in post.file else post.file }}</p>
-            </div>
-        </a>
-    {% else %}
-        <img src="{{ url_for('static', filename='uploads/' + post.file) }}" alt="แนบไฟล์" class="attached-img">
-    {% endif %}
-</div>
+                <div class="post-file">
+                    {% if post.file.endswith('.pdf') %}
+                        <a href="{{ url_for('static', filename='uploads/' + post.file) }}" target="_blank" class="pdf-card">
+                            <div class="pdf-icon">
+                                <img src="{{ url_for('static', filename='doc.png') }}" alt=" " style="height:30px; width:30px; vertical-align: middle; margin-right: 1px; margin-top:-1px;">
+                            </div>
+                            <div class="pdf-info">
+                                <p class="pdf-title">{{ post.file.split('_', 1)[1] if '_' in post.file else post.file }}</p>
+                            </div>
+                        </a>
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + post.file) }}" alt="แนบไฟล์" class="attached-img">
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
-<div class="post-card" data-post-id="{{ post.id }}">
-  <div class="interactions">
-    <button class="btn" onclick="likePost(this)">👍 <span class="like-count">0</span></button>
-    <button class="btn" onclick="toggleCommentBox(this)">💬 <span class="comment-count">0</span></button>
-  </div>
 
-  <div class="comment-box hidden">
-    <input type="text" placeholder="พิมพ์ความคิดเห็น...">
-    <button class="btn btn-primary" onclick="addComment(this)">โพสต์</button>
-  </div>
+            <div class="post-card" data-post-id="{{ post.id }}">
+                <div class="interactions">
+                    <button class="btn {% if post.user_liked %}liked{% endif %}" onclick="likePost(this)">
+                        👍 <span class="like-count">{{ post.like_count }}</span>
+                    </button>
+                    <button class="btn" onclick="toggleCommentBox(this)">
+                        💬 <span class="comment-count">{{ post.comment_count }}</span>
+                    </button>
+                </div>
 
-  <div class="comment-list"></div>
-</div>
+                <div class="comment-box hidden">
+                    <input type="text" placeholder="พิมพ์ความคิดเห็น...">
+                    <button class="btn btn-primary" onclick="addComment(this)">โพสต์</button>
+                </div>
 
+                <div class="comment-list" style="display:none;"></div>
+            </div>
         </div>
         {% endfor %}
-        
     </div>
 
-<script>
-// ฟังก์ชันค้นหาโพสต์
-function searchPosts() {
-  const searchInput = document.getElementById('searchInput');
-  const searchTerm = searchInput.value.toLowerCase();
-  const posts = document.querySelectorAll('.post');
-
-  posts.forEach(post => {
-    const postText = post.dataset.postText.toLowerCase();
-    const postUser = post.dataset.postUser.toLowerCase();
-    
-    if (postText.includes(searchTerm) || postUser.includes(searchTerm)) {
-      post.classList.remove('hidden');
-    } else {
-      post.classList.add('hidden');
+    <script>
+    // ฟังก์ชันค้นหาโพสต์
+    function searchPosts() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const posts = document.querySelectorAll('.post');
+        
+        posts.forEach(post => {
+            const text = post.dataset.postText.toLowerCase();
+            const user = post.dataset.postUser.toLowerCase();
+            
+            if (text.includes(input) || user.includes(input)) {
+                post.style.display = '';
+            } else {
+                post.style.display = 'none';
+            }
+        });
     }
-  });
-}
 
-// แสดงชื่อไฟล์เมื่อเลือก
-const fileInput = document.getElementById('file-upload');
-const fileNameLabel = document.getElementById('file-name');
-
-if (fileInput) {
-  fileInput.addEventListener('change', function() {
-    if (this.files && this.files.length > 0) {
-      const file = this.files[0];
-      fileNameLabel.textContent = file.name;
-      fileNameLabel.style.color = '#2c5f7c';
-      fileNameLabel.style.fontWeight = 'bold';
-      fileNameLabel.style.cursor = 'pointer';
-      
-      fileNameLabel.onclick = function() {
-        const url = URL.createObjectURL(file);
-        window.open(url, '_blank');
-      };
-    } else {
-      fileNameLabel.textContent = 'ไม่มีไฟล์ที่เลือก';
-      fileNameLabel.style.color = '#666';
-      fileNameLabel.style.fontWeight = 'normal';
-      fileNameLabel.style.cursor = 'default';
-      fileNameLabel.onclick = null;
+    // ฟังก์ชันกดไลค์ - เชื่อมต่อกับ database
+    async function likePost(button) {
+        const postCard = button.closest(".post-card");
+        const postId = postCard.dataset.postId;
+        
+        button.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/like/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const likeCount = button.querySelector(".like-count");
+                likeCount.innerText = data.like_count;
+                
+                if (data.liked) {
+                    button.classList.add("liked");
+                } else {
+                    button.classList.remove("liked");
+                }
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาดในการกดไลค์');
+        } finally {
+            button.disabled = false;
+        }
     }
-  });
-}
 
-// ส่วนคอมเมนต์และไลค์
-const currentUser = "{{ user }}";
+    // ฟังก์ชันแสดง/ซ่อนคอมเมนต์
+    async function toggleCommentBox(button) {
+        const postCard = button.closest(".post-card");
+        const postId = postCard.dataset.postId;
+        const commentBox = postCard.querySelector(".comment-box");
+        const commentList = postCard.querySelector(".comment-list");
 
-document.querySelectorAll(".post-card").forEach(postCard => {
-  const postId = postCard.dataset.postId;
+        commentBox.classList.toggle("hidden");
 
-  let likes = JSON.parse(localStorage.getItem("likes_" + postId)) || 0;
-  const likeCount = postCard.querySelector(".like-count");
-  likeCount.innerText = likes;
+        if (commentList.style.display === "none" || commentList.style.display === "") {
+            await loadComments(postId, commentList);
+            commentList.style.display = "block";
+        } else {
+            commentList.style.display = "none";
+        }
+    }
 
-  const savedComments = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-  const commentList = postCard.querySelector(".comment-list");
-  const commentCount = postCard.querySelector(".comment-count");
-  commentCount.innerText = savedComments.length;
+    // ฟังก์ชันโหลดคอมเมนต์จาก database
+    async function loadComments(postId, commentList) {
+        try {
+            const response = await fetch(`/api/comments/${postId}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                commentList.innerHTML = '';
+                
+                data.comments.forEach(comment => {
+                    const p = document.createElement("p");
+                    p.className = "comment";
+                    p.innerHTML = `<b>${comment.username}:</b> <span class="comment-text">${comment.text}</span>`;
+                    commentList.appendChild(p);
+                });
+            }
+        } catch (error) {
+            console.error('Error loading comments:', error);
+        }
+    }
 
-  savedComments.forEach(text => {
-    const p = document.createElement("p");
-    p.className = "comment";
-    p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-    commentList.appendChild(p);
-  });
-});
-
-function toggleCommentBox(button) {
-  const postCard = button.closest(".post-card");
-  const commentBox = postCard.querySelector(".comment-box");
-  const commentList = postCard.querySelector(".comment-list");
-
-  commentBox.classList.toggle("hidden");
-
-  if (commentList.style.display === "none" || commentList.style.display === "") {
-    commentList.style.display = "block";
-  } else {
-    commentList.style.display = "none";
-  }
-}
-
-function likePost(button) {
-  const postCard = button.closest(".post-card");
-  const postId = postCard.dataset.postId;
-  const likeCount = button.querySelector(".like-count");
-  let count = parseInt(likeCount.innerText) || 0;
-
-  if (button.classList.contains("liked")) {
-    count--;
-    button.classList.remove("liked");
-  } else {
-    count++;
-    button.classList.add("liked");
-  }
-
-  likeCount.innerText = count;
-  localStorage.setItem("likes_" + postId, count);
-}
-
-function addComment(button) {
-  const postCard = button.closest(".post-card");
-  const postId = postCard.dataset.postId;
-  const input = postCard.querySelector("input");
-  const text = input.value.trim();
-  if (text === "") return;
-
-  const commentList = postCard.querySelector(".comment-list");
-  const p = document.createElement("p");
-  p.className = "comment";
-  p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-  commentList.appendChild(p);
-
-  input.value = "";
-
-  const commentCount = postCard.querySelector(".comment-count");
-  let count = parseInt(commentCount.innerText) || 0;
-  count++;
-  commentCount.innerText = count;
-
-  const saved = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-  saved.push(text);
-  localStorage.setItem("comments_" + postId, JSON.stringify(saved));
-
-  commentList.style.display = "block";
-}
-</script>
+    // ฟังก์ชันเพิ่มคอมเมนต์
+    async function addComment(button) {
+        const postCard = button.closest(".post-card");
+        const postId = postCard.dataset.postId;
+        const input = postCard.querySelector("input");
+        const text = input.value.trim();
+        
+        if (text === "") return;
+        
+        button.disabled = true;
+        
+        try {
+            const response = await fetch(`/api/comment/${postId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ text: text })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                const commentList = postCard.querySelector(".comment-list");
+                const p = document.createElement("p");
+                p.className = "comment";
+                p.innerHTML = `<b>${data.username}:</b> <span class="comment-text">${data.text}</span>`;
+                commentList.appendChild(p);
+                
+                const commentCount = postCard.querySelector(".comment-count");
+                commentCount.innerText = data.comment_count;
+                
+                input.value = "";
+                commentList.style.display = "block";
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('เกิดข้อผิดพลาดในการเพิ่มคอมเมนต์');
+        } finally {
+            button.disabled = false;
+        }
+    }
+    </script>
 </body>
 </html>

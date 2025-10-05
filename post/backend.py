@@ -317,37 +317,271 @@ def sub():
 def math():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("math.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['math']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("math.html", posts=posts, user=current_user)
 
 @app.route('/physics')
 def physics():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("physics.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['physics']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("physics.html", posts=posts, user=current_user)
 
 @app.route('/biology')
 def biology():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("biology.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['biology']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("biology.html", posts=posts, user=current_user)
 
 @app.route('/chemistry')
 def chemistry():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("chemistry.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['chemistry']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("chemistry.html", posts=posts, user=current_user)
 
 @app.route('/history')
 def history():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("history.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['history']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("history.html", posts=posts, user=current_user)
 
 @app.route('/thai')
 def thai():
     if "user" not in session:
         return redirect(url_for('login'))
-    return render_template("thai.html", user=session["user"])
+    
+    category_names = {
+        'math': 'คณิตศาสตร์',
+        'physics': 'ฟิสิกส์',
+        'biology': 'ชีววิทยา',
+        'chemistry': 'เคมี',
+        'history': 'ประวัติศาสตร์',
+        'thai': 'ภาษาไทย'
+    }
+    
+    conn = duckdb.connect(DB_FILE)
+    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
+    data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['thai']).fetchall()
+    
+    posts = []
+    current_user = session['user']
+    
+    for s in data:
+        post_id = s[0]
+        like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
+        user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
+                                   [post_id, current_user]).fetchone()[0] > 0
+        comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
+        
+        posts.append({
+            'id': post_id,
+            'user': s[1],
+            'text': s[2],
+            'file': s[3],
+            'category': s[4],
+            'category_display': category_names.get(s[4], s[4]),
+            'category_class': s[4],
+            'timestamp': s[5],
+            'like_count': like_count,
+            'user_liked': user_liked,
+            'comment_count': comment_count
+        })
+    
+    conn.close()
+    return render_template("thai.html", posts=posts, user=current_user)
 
 @app.route("/logout")
 def logout():

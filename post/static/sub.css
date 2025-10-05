@@ -323,7 +323,7 @@ body {
 }
 
 .comment-box .btn-primary:hover {
-  background: #ffffff;  /* สีน้ำเงินเข้มขึ้นเวลา hover */
+  background: #182055;  /* สีน้ำเงินเข้มขึ้นเวลา hover */
 }
 
 .pdf-card {
@@ -380,7 +380,7 @@ body {
     color: #ffffff;
 }
 button.liked {
-  color: blue;
+  background-color: #4CAF50; 
   font-weight: bold;
 }
 
