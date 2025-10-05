@@ -91,6 +91,42 @@ def clear_session():
     flash("เคลียร์ session แล้ว")
     return redirect(url_for('login'))
 
+@app.route('/api/delete_post/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    if 'user' not in session:
+        return jsonify({'success': False, 'error': 'ไม่ได้ล็อกอิน'}), 401
+    
+    username = session['user']
+    conn = duckdb.connect(DB_FILE)
+    
+    # ตรวจสอบว่าโพสต์เป็นของผู้ใช้หรือไม่
+    post = conn.execute("SELECT user, file FROM posts WHERE id = ?", [post_id]).fetchone()
+    
+    if not post:
+        conn.close()
+        return jsonify({'success': False, 'error': 'ไม่พบโพสต์'}), 404
+    
+    if post[0] != username:
+        conn.close()
+        return jsonify({'success': False, 'error': 'คุณไม่มีสิทธิ์ลบโพสต์นี้'}), 403
+    
+    # ลบไฟล์ที่แนบมา (ถ้ามี)
+    if post[1]:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], post[1])
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
+    
+    # ลบข้อมูลที่เกี่ยวข้องกับโพสต์
+    conn.execute("DELETE FROM comments WHERE post_id = ?", [post_id])
+    conn.execute("DELETE FROM likes WHERE post_id = ?", [post_id])
+    conn.execute("DELETE FROM posts WHERE id = ?", [post_id])
+    conn.close()
+    
+    return jsonify({'success': True})
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -679,7 +715,6 @@ def setting():
 @app.route("/logout")
 def logout():
     session.clear()
-    flash("ออกจากระบบสำเร็จ")
     response = make_response(redirect(url_for('login')))
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
     response.headers['Pragma'] = 'no-cache'

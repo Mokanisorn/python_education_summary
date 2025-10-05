@@ -4,21 +4,6 @@
     <meta charset="UTF-8">
     <title>Edu-File</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
-    <style>
-        .btn.liked {
-            background-color: #4CAF50;
-            color: white;
-        }
-        .comment {
-            padding: 8px;
-            margin: 5px 0;
-            background: #f5f5f5;
-            border-radius: 5px;
-        }
-        .comment b {
-            color: #2c5f7c;
-        }
-    </style>
 </head>
 <body>
     <nav class="navbar">
@@ -82,15 +67,26 @@
         {% for post in posts %}
         <div class="post">
             <div class="post-header">
-                <div class="user-info">
-                    <i class="fa fa-user"></i> 
-                    <span class="username">{{ post.user }}</span>
-                </div>
-            </div>
+    <div class="user-info">
+        <i class="fa fa-user"></i> 
+        <span class="username">{{ post.user }}</span>
+    </div>
+    
+</div>
+             
 
             {% if post.category_display %}
             <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
             {% endif %}
+
+            {% if post.user == user %}
+             <div class="post-menu-container">
+        <button class="post-menu-btn" onclick="togglePostMenu(event, this)">⋮</button>
+        <div class="post-menu-dropdown hidden" data-post-id="{{ post.id }}">
+            <button onclick="deletePost(event, this.parentElement.dataset.postId)">     Delete</button>
+        </div>
+    </div>
+    {% endif %}
 
             <div class="post-content">
                 <div class="post-text">{{ post.text|e }}</div>
@@ -134,6 +130,93 @@
     </div>
 
     <script>
+    // ฟังก์ชันแสดง/ซ่อนเมนูโพสต์
+function togglePostMenu(event, button) {
+    event.stopPropagation();
+    const dropdown = button.nextElementSibling;
+    
+    // ปิดเมนูอื่นๆ ทั้งหมด
+    document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+        if (menu !== dropdown) {
+            menu.classList.add('hidden');
+        }
+    });
+    
+    dropdown.classList.toggle('hidden');
+}
+
+// ปิดเมนูเมื่อคลิกที่อื่น
+document.addEventListener('click', function(event) {
+    if (!event.target.closest('.post-menu-container')) {
+        document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
+            menu.classList.add('hidden');
+        });
+    }
+});
+
+// ฟังก์ชันลบโพสต์
+async function deletePost(event, postId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await fetch(`/api/delete_post/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // หาและลบโพสต์จาก DOM
+            const postElement = event.target.closest('.post');
+            postElement.style.transition = 'opacity 0.3s, transform 0.3s';
+            postElement.style.opacity = '0';
+            postElement.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                postElement.remove();
+            }, 300);
+        } else {
+            alert(data.error || 'เกิดข้อผิดพลาดในการลบโพสต์');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการลบโพสต์');
+    }
+}// ฟังก์ชันลบโพสต์
+async function deletePost(event, postId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await fetch(`/api/delete_post/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            // หาและลบโพสต์จาก DOM
+            const postElement = event.target.closest('.post');
+            postElement.style.transition = 'opacity 0.3s, transform 0.3s';
+            postElement.style.opacity = '0';
+            postElement.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                postElement.remove();
+            }, 300);
+        } else {
+            alert(data.error || 'เกิดข้อผิดพลาดในการลบโพสต์');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการลบโพสต์');
+    }
+}
     // แสดงชื่อไฟล์เมื่อเลือก
     const fileInput = document.getElementById('file-upload');
     const fileNameLabel = document.getElementById('file-name');
