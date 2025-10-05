@@ -7,221 +7,220 @@
 </head>
 <body>
     <nav class="navbar">
-    <div class="logo">
-        <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
-    </div>
-    <div class="nav-links">
-        <a href="{{ url_for('home') }}">
-        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">   
-        <span style="position:relative; left: -6px;">HOME</span>
-    </a>
-        <a href="{{ url_for('sub') }}">
-    <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">    
-    <span style="position:relative; left: -16px;">SUBJECT</span>
-</a>
-
-        <a href="#">
-        <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">    
-        <span style="position:relative; left: -5px;">SETTING</span>
-    </a>
-    </div>
-    <div class="user-menu">
-<i class="fa fa-user"></i> {{ user }}
-</div>
-   
-</nav>
-    <div class="container">
-    <div class="post-form-container">
-        <div class="form-header">
+        <div class="logo">
+            <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
+        </div>
+        <div class="nav-links">
+            <a href="{{ url_for('home') }}">
+                <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">   
+                <span style="position:relative; left: -6px;">HOME</span>
+            </a>
+            <a href="{{ url_for('sub') }}">
+                <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">    
+                <span style="position:relative; left: -16px;">SUBJECT</span>
+            </a>
+            <a href="#">
+                <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">    
+                <span style="position:relative; left: -5px;">SETTING</span>
+            </a>
+        </div>
+        <div class="user-menu">
             <i class="fa fa-user"></i> {{ user }}
         </div>
-        <form class="post-form" method="post" enctype="multipart/form-data">
-            <textarea id="summary-textarea" name="summary" placeholder="พิมพ์ข้อความสรุป..." required></textarea>
-            
-            <!-- ส่วนเลือกหมวดหมู่วิชา -->
-            <div class="category-selection">
-                <label for="category">หมวดหมู่:</label>
-                <select id="category" name="category" required>
-                    <option value="">Select Subjects</option>
-                    <option value="math">Mathematics</option>
-                    <option value="physics">Physics</option>
-                    <option value="biology">Biology</option>
-                    <option value="chemistry">Chemistry</option>
-                    <option value="history">History</option>
-                    <option value="thai">Thai</option>
-                </select>
+    </nav>
+
+    <div class="container">
+        <div class="post-form-container">
+            <div class="form-header">
+                <i class="fa fa-user"></i> {{ user }}
             </div>
-            
-            <div class="file-upload-box">
-                <input type="file" id="file-upload" name="file" accept=".pdf,image/*" hidden>
-                <label for="file-upload" class="custom-file-label">
-                    <img src="{{ url_for('static', filename='z.png') }}" alt="file icon" style="height: 22px; vertical-align: middle; margin-right: -3px;">
-                    เลือกไฟล์
-                </label>
-                <span id="file-name" class="file-name-label">ไม่มีไฟล์ที่เลือก</span>
-            </div>
-            <button type="submit">POST</button>
-        </form>
+            <form class="post-form" method="post" enctype="multipart/form-data">
+                <textarea id="summary-textarea" name="summary" placeholder="พิมพ์ข้อความสรุป..." required></textarea>
+                
+                <div class="category-selection">
+                    <label for="category">หมวดหมู่:</label>
+                    <select id="category" name="category" required>
+                        <option value="">Select Subjects</option>
+                        <option value="math">Mathematics</option>
+                        <option value="physics">Physics</option>
+                        <option value="biology">Biology</option>
+                        <option value="chemistry">Chemistry</option>
+                        <option value="history">History</option>
+                        <option value="thai">Thai</option>
+                    </select>
+                </div>
+                
+                <div class="file-upload-box">
+                    <input type="file" id="file-upload" name="file" accept=".pdf,image/*" hidden>
+                    <label for="file-upload" class="custom-file-label">
+                        <img src="{{ url_for('static', filename='z.png') }}" alt="file icon" style="height: 22px; vertical-align: middle; margin-right: -3px;">
+                        เลือกไฟล์
+                    </label>
+                    <span id="file-name" class="file-name-label">ไม่มีไฟล์ที่เลือก</span>
+                </div>
+                <button type="submit">POST</button>
+            </form>
+        </div>
     </div>
-</div>
-<div class="posts">
+
+    <div class="posts">
         {% for post in posts %}
         <div class="post">
-<div class="post-header">
-    <div class="user-info">
-        <i class="fa fa-user"></i> 
-        <span class="username">{{ user }}</span>
-    </div>
-    
-</div>
-{% if post.category_display %}
-        <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
-        {% endif %}
+            <div class="post-header">
+                <div class="user-info">
+                    <i class="fa fa-user"></i> 
+                    <span class="username">{{ post.user }}</span>
+                </div>
+            </div>
+
+            {% if post.category_display %}
+            <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
+            {% endif %}
+
             <div class="post-content">
                 <div class="post-text">{{ post.text|e }}</div>
                 {% if post.file %}
-           <div class="post-file">
-    {% if post.file.endswith('.pdf') %}
-        <a href="{{ url_for('static', filename='uploads/' + post.file) }}" target="_blank" class="pdf-card">
-            <div class="pdf-icon">
-                <img src="{{ url_for('static', filename='doc.png') }}" alt=" "style="height:30px; width:30px; vertical-align: middle; margin-right: 1px; margin-top:-1px;">
-            </div>
-            <div class="pdf-info">
-                <p class="pdf-title">{{ post.file.split('_', 1)[1] if '_' in post.file else post.file }}</p>
-            </div>
-        </a>
-    {% else %}
-        <img src="{{ url_for('static', filename='uploads/' + post.file) }}" alt="แนบไฟล์" class="attached-img">
-    {% endif %}
-</div>
+                <div class="post-file">
+                    {% if post.file.endswith('.pdf') %}
+                        <a href="{{ url_for('static', filename='uploads/' + post.file) }}" target="_blank" class="pdf-card">
+                            <div class="pdf-icon">
+                                <img src="{{ url_for('static', filename='doc.png') }}" alt=" " style="height:30px; width:30px; vertical-align: middle; margin-right: 1px; margin-top:-1px;">
+                            </div>
+                            <div class="pdf-info">
+                                <p class="pdf-title">{{ post.file.split('_', 1)[1] if '_' in post.file else post.file }}</p>
+                            </div>
+                        </a>
+                    {% else %}
+                        <img src="{{ url_for('static', filename='uploads/' + post.file) }}" alt="แนบไฟล์" class="attached-img">
+                    {% endif %}
+                </div>
                 {% endif %}
             </div>
-<div class="post-card" data-post-id="{{ post.id }}">
-  <div class="interactions">
-    <button class="btn" onclick="likePost(this)">👍 <span class="like-count">0</span></button>
-    <button class="btn" onclick="toggleCommentBox(this)">💬 <span class="comment-count">0</span></button>
-  </div>
 
-  <div class="comment-box hidden">
-    <input type="text" placeholder="พิมพ์ความคิดเห็น...">
-    <button class="btn btn-primary" onclick="addComment(this)">โพสต์</button>
-  </div>
+            <div class="post-card" data-post-id="{{ post.id }}">
+                <div class="interactions">
+                    <button class="btn" onclick="likePost(this)">👍 <span class="like-count">0</span></button>
+                    <button class="btn" onclick="toggleCommentBox(this)">💬 <span class="comment-count">0</span></button>
+                </div>
 
-  <div class="comment-list"></div>
-</div>
+                <div class="comment-box hidden">
+                    <input type="text" placeholder="พิมพ์ความคิดเห็น...">
+                    <button class="btn btn-primary" onclick="addComment(this)">โพสต์</button>
+                </div>
 
+                <div class="comment-list"></div>
+            </div>
         </div>
         {% endfor %}
-        
     </div>
 
-<script>
-// แสดงชื่อไฟล์เมื่อเลือก
-const fileInput = document.getElementById('file-upload');
-const fileNameLabel = document.getElementById('file-name');
+    <script>
+    // แสดงชื่อไฟล์เมื่อเลือก
+    const fileInput = document.getElementById('file-upload');
+    const fileNameLabel = document.getElementById('file-name');
 
-fileInput.addEventListener('change', function() {
-  if (this.files && this.files.length > 0) {
-    const file = this.files[0];
-    fileNameLabel.textContent = file.name;
-    fileNameLabel.style.color = '#2c5f7c';
-    fileNameLabel.style.fontWeight = 'bold';
-    fileNameLabel.style.cursor = 'pointer';
-    
-    fileNameLabel.onclick = function() {
-      const url = URL.createObjectURL(file);
-      window.open(url, '_blank');
-    };
-  } else {
-    fileNameLabel.textContent = 'ไม่มีไฟล์ที่เลือก';
-    fileNameLabel.style.color = '#666';
-    fileNameLabel.style.fontWeight = 'normal';
-    fileNameLabel.style.cursor = 'default';
-    fileNameLabel.onclick = null;
-  }
-});
+    fileInput.addEventListener('change', function() {
+      if (this.files && this.files.length > 0) {
+        const file = this.files[0];
+        fileNameLabel.textContent = file.name;
+        fileNameLabel.style.color = '#2c5f7c';
+        fileNameLabel.style.fontWeight = 'bold';
+        fileNameLabel.style.cursor = 'pointer';
+        
+        fileNameLabel.onclick = function() {
+          const url = URL.createObjectURL(file);
+          window.open(url, '_blank');
+        };
+      } else {
+        fileNameLabel.textContent = 'ไม่มีไฟล์ที่เลือก';
+        fileNameLabel.style.color = '#666';
+        fileNameLabel.style.fontWeight = 'normal';
+        fileNameLabel.style.cursor = 'default';
+        fileNameLabel.onclick = null;
+      }
+    });
 
-// ส่วนคอมเมนต์และไลค์
-const currentUser = "{{ user }}";
+    // ส่วนคอมเมนต์และไลค์
+    const currentUser = "{{ user }}";
 
-document.querySelectorAll(".post-card").forEach(postCard => {
-  const postId = postCard.dataset.postId;
+    document.querySelectorAll(".post-card").forEach(postCard => {
+      const postId = postCard.dataset.postId;
 
-  let likes = JSON.parse(localStorage.getItem("likes_" + postId)) || 0;
-  const likeCount = postCard.querySelector(".like-count");
-  likeCount.innerText = likes;
+      let likes = JSON.parse(localStorage.getItem("likes_" + postId)) || 0;
+      const likeCount = postCard.querySelector(".like-count");
+      likeCount.innerText = likes;
 
-  const savedComments = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-  const commentList = postCard.querySelector(".comment-list");
-  const commentCount = postCard.querySelector(".comment-count");
-  commentCount.innerText = savedComments.length;
+      const savedComments = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
+      const commentList = postCard.querySelector(".comment-list");
+      const commentCount = postCard.querySelector(".comment-count");
+      commentCount.innerText = savedComments.length;
 
-  savedComments.forEach(text => {
-    const p = document.createElement("p");
-    p.className = "comment";
-    p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-    commentList.appendChild(p);
-  });
-});
+      savedComments.forEach(text => {
+        const p = document.createElement("p");
+        p.className = "comment";
+        p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
+        commentList.appendChild(p);
+      });
+    });
 
-function toggleCommentBox(button) {
-  const postCard = button.closest(".post-card");
-  const commentBox = postCard.querySelector(".comment-box");
-  const commentList = postCard.querySelector(".comment-list");
+    function toggleCommentBox(button) {
+      const postCard = button.closest(".post-card");
+      const commentBox = postCard.querySelector(".comment-box");
+      const commentList = postCard.querySelector(".comment-list");
 
-  commentBox.classList.toggle("hidden");
+      commentBox.classList.toggle("hidden");
 
-  if (commentList.style.display === "none" || commentList.style.display === "") {
-    commentList.style.display = "block";
-  } else {
-    commentList.style.display = "none";
-  }
-}
+      if (commentList.style.display === "none" || commentList.style.display === "") {
+        commentList.style.display = "block";
+      } else {
+        commentList.style.display = "none";
+      }
+    }
 
-function likePost(button) {
-  const postCard = button.closest(".post-card");
-  const postId = postCard.dataset.postId;
-  const likeCount = button.querySelector(".like-count");
-  let count = parseInt(likeCount.innerText) || 0;
+    function likePost(button) {
+      const postCard = button.closest(".post-card");
+      const postId = postCard.dataset.postId;
+      const likeCount = button.querySelector(".like-count");
+      let count = parseInt(likeCount.innerText) || 0;
 
-  if (button.classList.contains("liked")) {
-    count--;
-    button.classList.remove("liked");
-  } else {
-    count++;
-    button.classList.add("liked");
-  }
+      if (button.classList.contains("liked")) {
+        count--;
+        button.classList.remove("liked");
+      } else {
+        count++;
+        button.classList.add("liked");
+      }
 
-  likeCount.innerText = count;
-  localStorage.setItem("likes_" + postId, count);
-}
+      likeCount.innerText = count;
+      localStorage.setItem("likes_" + postId, count);
+    }
 
-function addComment(button) {
-  const postCard = button.closest(".post-card");
-  const postId = postCard.dataset.postId;
-  const input = postCard.querySelector("input");
-  const text = input.value.trim();
-  if (text === "") return;
+    function addComment(button) {
+      const postCard = button.closest(".post-card");
+      const postId = postCard.dataset.postId;
+      const input = postCard.querySelector("input");
+      const text = input.value.trim();
+      if (text === "") return;
 
-  const commentList = postCard.querySelector(".comment-list");
-  const p = document.createElement("p");
-  p.className = "comment";
-  p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
-  commentList.appendChild(p);
+      const commentList = postCard.querySelector(".comment-list");
+      const p = document.createElement("p");
+      p.className = "comment";
+      p.innerHTML = `<b>${currentUser}:</b> <span class="comment-text">${text}</span>`;
+      commentList.appendChild(p);
 
-  input.value = "";
+      input.value = "";
 
-  const commentCount = postCard.querySelector(".comment-count");
-  let count = parseInt(commentCount.innerText) || 0;
-  count++;
-  commentCount.innerText = count;
+      const commentCount = postCard.querySelector(".comment-count");
+      let count = parseInt(commentCount.innerText) || 0;
+      count++;
+      commentCount.innerText = count;
 
-  const saved = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
-  saved.push(text);
-  localStorage.setItem("comments_" + postId, JSON.stringify(saved));
+      const saved = JSON.parse(localStorage.getItem("comments_" + postId)) || [];
+      saved.push(text);
+      localStorage.setItem("comments_" + postId, JSON.stringify(saved));
 
-  commentList.style.display = "block";
-}
-</script>
+      commentList.style.display = "block";
+    }
+    </script>
 </body>
 </html>

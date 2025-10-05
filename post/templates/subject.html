@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="th">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title class="fancy-title">เลือกรายวิชา</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='yada.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="logo">
+      <img src="{{ url_for('static', filename='edulogo.png') }}" alt="Logo" style="height:35px; vertical-align:middle; margin-right:8px;">
+    </div>
+    <div class="nav-links">
+      <a href="{{ url_for('home') }}">
+        <img src="{{ url_for('static', filename='home.png') }}" alt="Home" style="height:20px; vertical-align:middle; position: relative; top: -3px; margin-left: -37px;">
+        <span style="position:relative; left: -6px;">HOME</span>
+      </a>
+      <a href="{{ url_for('sub') }}">
+        <img src="{{ url_for('static', filename='book.png') }}" alt="Subject" style="height:42px; vertical-align:middle; position: relative; margin-left: -37px;">
+        <span style="position:relative; left: -16px;">SUBJECT</span>
+      </a>
+      <a href="#">
+        <img src="{{ url_for('static', filename='set.png') }}" alt="Setting" style="height:20px; vertical-align:middle; position: relative; top: -2px; margin-left: -37px;">
+        <span style="position:relative; left: -5px;">SETTING</span>
+      </a>
+    </div>
+    <div class="user-menu">
+      <i class="fa fa-user"></i> {{ user }}
+    </div>
+  </nav>
+
+  <div class="container" role="main">
+    <h1 class="fancy-title">เลือกรายวิชา</h1>
+    <div class="grid" role="list">
+      <button class="card math" role="listitem" data-category="math" aria-label="คณิตศาสตร์"></button>
+      <button class="card phys" role="listitem" data-category="physics" aria-label="ฟิสิกส์"></button>
+      <button class="card bio" role="listitem" data-category="biology" aria-label="ชีววิทยา"></button>
+      <button class="card chem" role="listitem" data-category="chemistry" aria-label="เคมี"></button>
+      <button class="card hist" role="listitem" data-category="history" aria-label="ประวัติศาสตร์"></button>
+      <button class="card thai" role="listitem" data-category="thai" aria-label="ภาษาไทย"></button>
+    </div>
+  </div>
+
+  <script>
+  // ✅ ฟังก์ชันเลือกวิชาใหม่
+  document.querySelectorAll('.card').forEach(card => {
+    card.addEventListener('click', function() {
+      const category = this.dataset.category;
+      // ใช้ Flask url_for แทน hardcoded route
+      const baseUrl = "{{ url_for('subject_page', category='__REPLACE__') }}";
+      const subjectUrl = baseUrl.replace('__REPLACE__', category);
+      window.location.href = subjectUrl;
+    });
+
+    // ✅ รองรับ Enter / Space
+    card.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        card.click();
+      }
+    });
+
+    card.setAttribute('tabindex','0');
+  });
+  </script>
+</body>
+</html>
