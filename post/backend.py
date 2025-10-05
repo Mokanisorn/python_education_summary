@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, make_response
 from flask_session import Session
 import os
 from datetime import datetime
@@ -41,7 +41,6 @@ try:
         id BIGINT PRIMARY KEY DEFAULT nextval('seq_posts_id'),
         user TEXT,
         text TEXT,
-        file TEXT,
         category TEXT,
         timestamp TIMESTAMP
     )
@@ -76,7 +75,7 @@ conn.close()
 # ตรวจสอบการล็อกอินก่อนเข้าหน้าอื่น
 @app.before_request
 def check_session():
-    if request.endpoint not in ['login', 'register', 'static', 'clear_session', 'index']:
+     if request.endpoint not in ['login', 'register', 'static', 'clear_session', 'index']:
         if 'user' not in session:
             flash("กรุณาเข้าสู่ระบบก่อนเข้าหน้านี้")
             return redirect(url_for('login'))
@@ -105,11 +104,9 @@ def login():
         if user and check_password_hash(user[2], password):
             session.clear()
             session['user'] = username
-            flash("เข้าสู่ระบบสำเร็จ")
             return redirect(url_for('home'))
         else:
             flash("ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง")
-
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -126,7 +123,6 @@ def register():
         else:
             hashed_pw = generate_password_hash(password)
             conn.execute("INSERT INTO users (username, password) VALUES (?, ?)", [username, hashed_pw])
-            flash("สมัครสมาชิกสำเร็จ")
             conn.close()
             return redirect(url_for('login'))
 
@@ -161,7 +157,6 @@ def home():
             "INSERT INTO posts (user, text, file, category, timestamp) VALUES (?, ?, ?, ?, ?)",
             [session['user'], text, file_filename, category, datetime.now()]
         )
-        flash("เพิ่มสรุปแล้ว")
         conn.close()
         return redirect(url_for('home'))
 
@@ -587,11 +582,109 @@ def thai():
     conn.close()
     return render_template("thai.html", posts=posts, user=current_user)
 
+@app.route('/setting', methods=['GET', 'POST'])
+def setting():
+    if 'user' not in session:
+        flash("กรุณาเข้าสู่ระบบก่อนเข้าหน้านี้")
+        return redirect(url_for('login'))
+    
+    current_username = session['user']
+    conn = duckdb.connect(DB_FILE)
+    
+    if request.method == 'POST':
+        new_username = request.form.get('new_username', '').strip()
+        current_password = request.form.get('current_password', '')
+        new_password = request.form.get('new_password', '')
+        confirm_password = request.form.get('confirm_password', '')
+        
+        # ดึงข้อมูลผู้ใช้ปัจจุบัน
+        user = conn.execute("SELECT * FROM users WHERE username = ?", [current_username]).fetchone()
+        
+        if not user:
+            flash("ไม่พบข้อมูลผู้ใช้")
+            conn.close()
+            return redirect(url_for('set'))
+        
+        # ตรวจสอบรหัสผ่านปัจจุบัน
+        if not check_password_hash(user[2], current_password):
+            flash("รหัสผ่านปัจจุบันไม่ถูกต้อง")
+            conn.close()
+            response = make_response(render_template('set.html', user=current_username, current_username=current_username))
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+        
+        # ตรวจสอบรหัสผ่านใหม่ตรงกันหรือไม่
+        if new_password != confirm_password:
+            flash("รหัสผ่านใหม่ไม่ตรงกัน")
+            conn.close()
+            response = make_response(render_template('set.html', user=current_username, current_username=current_username))
+            response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+            response.headers['Pragma'] = 'no-cache'
+            response.headers['Expires'] = '0'
+            return response
+        
+        # ตรวจสอบว่าชื่อผู้ใช้ใหม่ซ้ำกับคนอื่นหรือไม่
+        if new_username != current_username:
+            existing = conn.execute("SELECT * FROM users WHERE username = ?", [new_username]).fetchone()
+            if existing:
+                flash("ชื่อผู้ใช้นี้มีคนใช้แล้ว")
+                conn.close()
+                response = make_response(render_template('set.html', user=current_username, current_username=current_username))
+                response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+                response.headers['Pragma'] = 'no-cache'
+                response.headers['Expires'] = '0'
+                return response
+        
+        # อัปเดตข้อมูล
+        hashed_pw = generate_password_hash(new_password)
+        
+        try:
+            # อัปเดต username และ password
+            conn.execute("UPDATE users SET username = ?, password = ? WHERE username = ?", 
+                        [new_username, hashed_pw, current_username])
+            
+            # อัปเดต username ในตาราง posts
+            conn.execute("UPDATE posts SET user = ? WHERE user = ?", 
+                        [new_username, current_username])
+            
+            # อัปเดต username ในตาราง likes
+            conn.execute("UPDATE likes SET username = ? WHERE username = ?", 
+                        [new_username, current_username])
+            
+            # อัปเดต username ในตาราง comments
+            conn.execute("UPDATE comments SET username = ? WHERE username = ?", 
+                        [new_username, current_username])
+            
+            # อัปเดต session
+            session['user'] = new_username
+            
+            flash("อัปเดตข้อมูลสำเร็จ")
+            conn.close()
+            return redirect(url_for('set'))
+            
+        except Exception as e:
+            flash(f"เกิดข้อผิดพลาด: {str(e)}")
+            conn.close()
+            return redirect(url_for('set'))
+    
+    conn.close()
+    response = make_response(render_template('setting.html', user=current_username, current_username=current_username))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
 @app.route("/logout")
 def logout():
     session.clear()
     flash("ออกจากระบบสำเร็จ")
-    return redirect(url_for('login'))
+    response = make_response(redirect(url_for('login')))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 if __name__ == "__main__":
-    app.run(port=5002, debug=True)
+    app.run(host="0.0.0.0", port=5000, debug=True)

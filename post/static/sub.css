@@ -5,6 +5,7 @@ body {
 }
 
 .navbar {
+    
     background: #8eaab8;
     display: flex;
     flex-direction: row;
@@ -321,6 +322,7 @@ body {
   cursor: pointer;
   transition: 0.2s;
 }
+
 
 .comment-box .btn-primary:hover {
   background: #182055;  /* สีน้ำเงินเข้มขึ้นเวลา hover */

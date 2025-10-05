@@ -4,20 +4,26 @@
     <meta charset="UTF-8">
     <title>Edu-File</title>
 
-    <!-- CSS -->
-    <link rel="stylesheet" href="static/wawa.css">
-
-    <!-- Google Fonts -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='wawa.css') }}">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <!-- โลโก้ -->
-        <img src="static/eduuS.png" alt="Logo" style="height:175px; vertical-align:middle; margin-left: -170px; margin-bottom: 50px;">
+        <img src="{{ url_for('static', filename='eduuS.png') }}" alt="Logo"
+             style="height:175px; vertical-align:middle; margin-left: -170px; margin-bottom: 50px;">
 
-        <!-- กล่องฟอร์มล็อกอิน -->
         <div class="form-card">
             <h2>Login</h2>
+
+            <!-- แสดงข้อความแจ้งเตือน -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+              {% if messages %}
+                {% for category, message in messages %}
+                  <div class="flash-message {{ category }}">{{ message }}</div>
+                {% endfor %}
+              {% endif %}
+            {% endwith %}
+
             <form action="/login" method="post">
                 <div class="input-group">
                     <label for="username">USERNAME</label>

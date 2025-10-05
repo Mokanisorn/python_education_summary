@@ -8,6 +8,17 @@ body {
     background: url('bg_web.png') center 25px;
 }
 
+        .flash-message {
+            background-color: #ffcccc;
+            color: #a94442;
+            border: 1px solid #a94442;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
 .container {
     padding: 10px;
     width: 100%;
@@ -93,3 +104,4 @@ h2 {
 .login-link a:hover {
     text-decoration: underline;
 }
+

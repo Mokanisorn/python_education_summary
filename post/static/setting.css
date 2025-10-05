@@ -320,23 +320,28 @@ object-fit: contain;
 
 
 .user-info {
-background: rgba(255,255,255,0.97);
-border-radius: 32px;
-padding: 3em 2.5em 2.5em 2.5em;
-box-shadow: 0 8px 32px 0 rgba(60, 80, 180, 0.18);
-font-size: 1.18em;
-color: #749aac;
-max-width: 540px;
-margin: 2.5em auto 0 auto;
-position: relative;
-display: flex;
-flex-direction: column;
-align-items: center;
-border: 1.5px solid #b3c6d6;
-backdrop-filter: blur(2px);
+    background: rgba(255,255,255,0.97);
+    border-radius: 32px;
+    padding: 3em 2.5em 2.5em 2.5em;
+    box-shadow: 0 8px 32px 0 rgba(60, 80, 180, 0.18);
+    font-size: 1.18em;
+    color: #749aac;
+    max-width: 540px;
+    margin: 2.5em auto 0 auto;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    border: 1.5px solid #b3c6d6;
+    backdrop-filter: blur(2px);
+    text-align: center; /* เพิ่มบรรทัดนี้ */
 }
-
 .user-info-row {
+display: grid;
+grid-template-columns: 200px 1fr;
+align-items: center;
+gap: 20px;
+margin-bottom: 20px;
 color: #749aac;
 display: flex;
 align-items: center;
@@ -348,19 +353,15 @@ width: 100%;
 
 
 .user-info-label {
-
 min-width: 160px;
-
 font-weight: 700;
-
 color:#749aac;
-
 letter-spacing: 1.2px;
-
 font-size: 1.13em;
-
 text-shadow: 0 1px 2px #e0e7ff;
-
+text-align: right;
+font-weight: 500;
+color: #5a7a8c;
 }
 
 
@@ -386,35 +387,31 @@ box-shadow: 0 1px 8px #e0e7ff;
 
 
 .user-info input[type="text"], .user-info input[type="password"] {
-
 background: #f7faff;
-
 border: 1.5px solid #bfcfff;
-
 border-radius: 12px;
-
 padding: 0.7em 1.3em;
-
 font-size: 1.08em;
-
 width: 200px;
-
 transition: border 0.2s, box-shadow 0.2s;
-
 box-shadow: 0 1px 8px #e0e7ff;
-
+width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 14px;
+box-sizing: border-box;
 }
 
 
 
 .user-info input[type="text"]:focus, .user-info input[type="password"]:focus {
-
 border: 2px solid #4f8cff;
-
 outline: none;
-
 box-shadow: 0 2px 16px #b3c6d6;
-
+outline: none;
+    border-color: #5a7a8c;
+    box-shadow: 0 0 0 3px rgba(90, 122, 140, 0.1);
 }
 
 
@@ -433,20 +430,20 @@ box-shadow: 0 2px 12px #e0e7ff;
 transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
 
-.user-info button{
-background:#749aac;
-color: #fff;
-border: none;
-border-radius: 10px;
-padding: 0.8em 2.4em;
-font-size: 1.13em;
-font-weight: bold;
-cursor: pointer;
-margin-left: 1em;
-box-shadow: 0 2px 12px #e0e7ff;
-transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+.user-info button {
+    background: #749aac;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 0.8em 2.4em;
+    font-size: 1.13em;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 1em auto; /* เปลี่ยนจาก margin-left เป็น margin: auto */
+    display: block; /* เพิ่มบรรทัดนี้ */
+    box-shadow: 0 2px 12px #e0e7ff;
+    transition: background 0.2s, color 0.2s, box-shadow 0.2s;
 }
-
 .navbar {
     background: #8eaab8;
     display: flex;
@@ -473,6 +470,54 @@ transition: background 0.2s, color 0.2s, box-shadow 0.2s;
     margin: 0 1em;
     font-size: 1.1em;
     transition: text-shadow 0.2s;
+}
+
+/* Flash Messages Styling */
+.flash-messages {
+    position: fixed;
+    top: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    z-index: 9999;
+}
+
+.flash-message {
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+    color: white;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-20px);
+    transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+}
+
+.flash-message.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.flash-message.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+
+.flash-message.error {
+    background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
+}
+
+.flash-message.warning {
+    background: linear-gradient(135deg, #f2994a 0%, #f2c94c 100%);
+}
+
+.flash-message.info {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .nav-links a:hover {

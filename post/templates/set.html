@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Account Setting</title>
-    <link rel="stylesheet" href="/static/setting.css">
+    <title>Setting</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='setting.css') }}">
 </head>
 <body class="setting-bg">
 <nav class="navbar">
@@ -29,18 +29,23 @@
             <i class="fa fa-user"></i> {{ user }}
         </div>
     </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash-messages">
+                {% for message in messages %}
+                    <div class="flash-message">
+                        ✓ {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
     <div class="container">
         <h1>Setting</h1>
         <div class="user-info">
-            <div class="user-info-row">
-                <span class="user-info-label">Username :</span>
-                <span class="user-info-value">{{ current_username }}</span>
-            </div>
-            <div class="user-info-row">
-                <span class="user-info-label">Password :</span>
-                <span class="user-info-value">••••••••</span>
-            </div>
-
             <form action="/setting" method="post" class="change-info-form">
                 <h2>อัปเดตข้อมูลบัญชี</h2>
                 <div class="user-info-row">
@@ -71,5 +76,89 @@
             </form>
         </div>
     </div>
+
+    <script>
+     window.onload = function() {
+        // เคลียร์ history เพื่อไม่ให้กดย้อนกลับได้
+        if (typeof history.pushState === "function") {
+            history.pushState("jibberish", null, null);
+            window.onpopstate = function() {
+                history.pushState('newjibberish', null, null);
+            };
+        } else {
+            var ignoreHashChange = true;
+            window.onhashchange = function() {
+                if (!ignoreHashChange) {
+                    ignoreHashChange = true;
+                    window.location.hash = Math.random();
+                } else {
+                    ignoreHashChange = false;   
+                }
+            };
+        }
+    };
+
+    // ตรวจสอบเมื่อกลับมาที่หน้านี้
+    window.addEventListener('pageshow', function(event) {
+        var historyTraversal = event.persisted || 
+            (typeof window.performance != 'undefined' && 
+            window.performance.navigation.type === 2);
+        if (historyTraversal) {
+            window.location.reload();
+        }
+    });
+
+    // Auto hide flash messages
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        
+        if (flashMessages.length > 0) {
+            setTimeout(function() {
+                flashMessages.forEach(function(msg) {
+                    msg.classList.add('show');
+                });
+            }, 100);
+            
+            setTimeout(function() {
+                flashMessages.forEach(function(msg) {
+                    msg.classList.remove('show');
+                    msg.classList.add('hide');
+                });
+                
+                setTimeout(function() {
+                    const container = document.querySelector('.flash-messages');
+                    if (container) container.remove();
+                }, 500);
+            }, 3000);
+        }
+    });
+    // Auto hide flash messages after 3 seconds
+    document.addEventListener('DOMContentLoaded', function() {
+        const flashMessages = document.querySelectorAll('.flash-message');
+        
+        if (flashMessages.length > 0) {
+            // แสดงข้อความ
+            setTimeout(function() {
+                flashMessages.forEach(function(msg) {
+                    msg.classList.add('show');
+                });
+            }, 100);
+            
+            // ซ่อนข้อความ
+            setTimeout(function() {
+                flashMessages.forEach(function(msg) {
+                    msg.classList.remove('show');
+                    msg.classList.add('hide');
+                });
+                
+                // ลบออกจาก DOM
+                setTimeout(function() {
+                    const container = document.querySelector('.flash-messages');
+                    if (container) container.remove();
+                }, 500);
+            }, 3000);
+        }
+    });
+</script>
 </body>
 </html>
