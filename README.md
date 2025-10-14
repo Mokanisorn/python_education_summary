@@ -1,1 +1,1 @@
-# python_education_summaries
+# python_education_summary
