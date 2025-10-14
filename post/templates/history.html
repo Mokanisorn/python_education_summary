@@ -29,7 +29,6 @@
         </div>
     </nav>
 
-    <!-- Search Bar -->
     <div class="search-container">
         <div class="search-box">
             <input type="text" id="searchInput" placeholder="ค้นหาโพสต์..." onkeyup="searchPosts()">
@@ -93,7 +92,6 @@
     </div>
 
     <script>
-    // ฟังก์ชันค้นหาโพสต์
     function searchPosts() {
         const input = document.getElementById('searchInput').value.toLowerCase();
         const posts = document.querySelectorAll('.post');
@@ -109,8 +107,6 @@
             }
         });
     }
-
-    // ฟังก์ชันกดไลค์ - เชื่อมต่อกับ database
     async function likePost(button) {
         const postCard = button.closest(".post-card");
         const postId = postCard.dataset.postId;
@@ -145,7 +141,6 @@
         }
     }
 
-    // ฟังก์ชันแสดง/ซ่อนคอมเมนต์
     async function toggleCommentBox(button) {
         const postCard = button.closest(".post-card");
         const postId = postCard.dataset.postId;
@@ -162,7 +157,6 @@
         }
     }
 
-    // ฟังก์ชันโหลดคอมเมนต์จาก database
     async function loadComments(postId, commentList) {
         try {
             const response = await fetch(`/api/comments/${postId}`);
@@ -183,7 +177,6 @@
         }
     }
 
-    // ฟังก์ชันเพิ่มคอมเมนต์
     async function addComment(button) {
         const postCard = button.closest(".post-card");
         const postId = postCard.dataset.postId;

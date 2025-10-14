@@ -29,8 +29,6 @@
             <i class="fa fa-user"></i> {{ user }}
         </div>
     </nav>
-
-    <!-- Flash Messages -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             <div class="flash-messages">
@@ -79,7 +77,6 @@
 
     <script>
      window.onload = function() {
-        // เคลียร์ history เพื่อไม่ให้กดย้อนกลับได้
         if (typeof history.pushState === "function") {
             history.pushState("jibberish", null, null);
             window.onpopstate = function() {
@@ -98,7 +95,6 @@
         }
     };
 
-    // ตรวจสอบเมื่อกลับมาที่หน้านี้
     window.addEventListener('pageshow', function(event) {
         var historyTraversal = event.persisted || 
             (typeof window.performance != 'undefined' && 
@@ -108,7 +104,6 @@
         }
     });
 
-    // Auto hide flash messages
     document.addEventListener('DOMContentLoaded', function() {
         const flashMessages = document.querySelectorAll('.flash-message');
         
@@ -132,26 +127,22 @@
             }, 3000);
         }
     });
-    // Auto hide flash messages after 3 seconds
     document.addEventListener('DOMContentLoaded', function() {
         const flashMessages = document.querySelectorAll('.flash-message');
         
         if (flashMessages.length > 0) {
-            // แสดงข้อความ
             setTimeout(function() {
                 flashMessages.forEach(function(msg) {
                     msg.classList.add('show');
                 });
             }, 100);
             
-            // ซ่อนข้อความ
             setTimeout(function() {
                 flashMessages.forEach(function(msg) {
                     msg.classList.remove('show');
                     msg.classList.add('hide');
                 });
                 
-                // ลบออกจาก DOM
                 setTimeout(function() {
                     const container = document.querySelector('.flash-messages');
                     if (container) container.remove();

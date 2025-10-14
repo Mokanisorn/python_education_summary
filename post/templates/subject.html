@@ -51,12 +51,9 @@
   </div>
 
   <script>
-// เพิ่มฟังก์ชันสำหรับปุ่มวิชา
 document.querySelectorAll('.card').forEach(card => {
   card.addEventListener('click', function() {
     const subject = this.dataset.subject;
-    
-    // กำหนด URL ตามวิชา
     const subjectUrls = {
       'คณิตศาสตร์': "{{ url_for('math') }}",
       'ฟิสิกส์': "{{ url_for('physics') }}",
@@ -65,14 +62,10 @@ document.querySelectorAll('.card').forEach(card => {
       'ประวัติศาสตร์': "{{ url_for('history') }}",
       'ภาษาไทย': "{{ url_for('thai') }}"
     };
-    
-    // ไปยังหน้าที่กำหนด
     if (subjectUrls[subject]) {
       window.location.href = subjectUrls[subject];
     }
   });
-  
-  // keyboard accessibility
   card.addEventListener('keydown', (e) => {
     if(e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();

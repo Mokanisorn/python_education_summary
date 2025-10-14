@@ -14,8 +14,6 @@
 
         <div class="form-card">
             <h2>Login</h2>
-
-            <!-- แสดงข้อความแจ้งเตือน -->
             {% with messages = get_flashed_messages(with_categories=true) %}
               {% if messages %}
                 {% for category, message in messages %}

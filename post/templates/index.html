@@ -28,7 +28,6 @@
             <i class="fa fa-user"></i> {{ user }}
         </div>
     </nav>
-
     <div class="container">
         <div class="post-form-container">
             <div class="form-header">
@@ -73,8 +72,6 @@
     </div>
     
 </div>
-             
-
             {% if post.category_display %}
             <span class="post-category {{ post.category_class }}">{{ post.category_display }}</span>
             {% endif %}
@@ -130,12 +127,10 @@
     </div>
 
     <script>
-    // ฟังก์ชันแสดง/ซ่อนเมนูโพสต์
 function togglePostMenu(event, button) {
     event.stopPropagation();
     const dropdown = button.nextElementSibling;
     
-    // ปิดเมนูอื่นๆ ทั้งหมด
     document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
         if (menu !== dropdown) {
             menu.classList.add('hidden');
@@ -145,7 +140,6 @@ function togglePostMenu(event, button) {
     dropdown.classList.toggle('hidden');
 }
 
-// ปิดเมนูเมื่อคลิกที่อื่น
 document.addEventListener('click', function(event) {
     if (!event.target.closest('.post-menu-container')) {
         document.querySelectorAll('.post-menu-dropdown').forEach(menu => {
@@ -154,7 +148,6 @@ document.addEventListener('click', function(event) {
     }
 });
 
-// ฟังก์ชันลบโพสต์
 async function deletePost(event, postId) {
     event.stopPropagation();
     
@@ -169,38 +162,6 @@ async function deletePost(event, postId) {
         const data = await response.json();
         
         if (data.success) {
-            // หาและลบโพสต์จาก DOM
-            const postElement = event.target.closest('.post');
-            postElement.style.transition = 'opacity 0.3s, transform 0.3s';
-            postElement.style.opacity = '0';
-            postElement.style.transform = 'translateY(-20px)';
-            
-            setTimeout(() => {
-                postElement.remove();
-            }, 300);
-        } else {
-            alert(data.error || 'เกิดข้อผิดพลาดในการลบโพสต์');
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert('เกิดข้อผิดพลาดในการลบโพสต์');
-    }
-}// ฟังก์ชันลบโพสต์
-async function deletePost(event, postId) {
-    event.stopPropagation();
-    
-    try {
-        const response = await fetch(`/api/delete_post/${postId}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-            // หาและลบโพสต์จาก DOM
             const postElement = event.target.closest('.post');
             postElement.style.transition = 'opacity 0.3s, transform 0.3s';
             postElement.style.opacity = '0';
@@ -217,7 +178,36 @@ async function deletePost(event, postId) {
         alert('เกิดข้อผิดพลาดในการลบโพสต์');
     }
 }
-    // แสดงชื่อไฟล์เมื่อเลือก
+async function deletePost(event, postId) {
+    event.stopPropagation();
+    
+    try {
+        const response = await fetch(`/api/delete_post/${postId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            const postElement = event.target.closest('.post');
+            postElement.style.transition = 'opacity 0.3s, transform 0.3s';
+            postElement.style.opacity = '0';
+            postElement.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                postElement.remove();
+            }, 300);
+        } else {
+            alert(data.error || 'เกิดข้อผิดพลาดในการลบโพสต์');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('เกิดข้อผิดพลาดในการลบโพสต์');
+    }
+}
     const fileInput = document.getElementById('file-upload');
     const fileNameLabel = document.getElementById('file-name');
 
@@ -242,12 +232,11 @@ async function deletePost(event, postId) {
       }
     });
 
-    // ฟังก์ชันกดไลค์ - เชื่อมต่อกับ database
     async function likePost(button) {
       const postCard = button.closest(".post-card");
       const postId = postCard.dataset.postId;
       
-      button.disabled = true; // ป้องกันกดซ้ำ
+      button.disabled = true;
       
       try {
         const response = await fetch(`/api/like/${postId}`, {
@@ -263,7 +252,6 @@ async function deletePost(event, postId) {
           const likeCount = button.querySelector(".like-count");
           likeCount.innerText = data.like_count;
           
-          // เปลี่ยนสีปุ่มตามสถานะไลค์
           if (data.liked) {
             button.classList.add("liked");
           } else {
@@ -278,7 +266,6 @@ async function deletePost(event, postId) {
       }
     }
 
-    // ฟังก์ชันแสดง/ซ่อนคอมเมนต์
     async function toggleCommentBox(button) {
       const postCard = button.closest(".post-card");
       const postId = postCard.dataset.postId;
@@ -287,7 +274,6 @@ async function deletePost(event, postId) {
 
       commentBox.classList.toggle("hidden");
 
-      // ถ้ากำลังจะแสดงคอมเมนต์ ให้โหลดจาก database
       if (commentList.style.display === "none" || commentList.style.display === "") {
         await loadComments(postId, commentList);
         commentList.style.display = "block";
@@ -296,19 +282,17 @@ async function deletePost(event, postId) {
       }
     }
 
-    // ฟังก์ชันโหลดคอมเมนต์จาก database - แสดงชื่อ user ที่คอมเมนต์
     async function loadComments(postId, commentList) {
       try {
         const response = await fetch(`/api/comments/${postId}`);
         const data = await response.json();
         
         if (data.success) {
-          commentList.innerHTML = ''; // ล้างคอมเมนต์เก่า
+          commentList.innerHTML = '';
           
           data.comments.forEach(comment => {
             const p = document.createElement("p");
             p.className = "comment";
-            // แสดงชื่อ user ที่คอมเมนต์จริงๆ จาก database
             p.innerHTML = `<b>${comment.username}:</b> <span class="comment-text">${comment.text}</span>`;
             commentList.appendChild(p);
           });
@@ -318,7 +302,6 @@ async function deletePost(event, postId) {
       }
     }
 
-    // ฟังก์ชันเพิ่มคอมเมนต์ - บันทึกลง database พร้อมชื่อ user
     async function addComment(button) {
       const postCard = button.closest(".post-card");
       const postId = postCard.dataset.postId;
@@ -327,7 +310,7 @@ async function deletePost(event, postId) {
       
       if (text === "") return;
       
-      button.disabled = true; // ป้องกันกดซ้ำ
+      button.disabled = true; 
       
       try {
         const response = await fetch(`/api/comment/${postId}`, {
@@ -341,21 +324,17 @@ async function deletePost(event, postId) {
         const data = await response.json();
         
         if (data.success) {
-          // เพิ่มคอมเมนต์ใหม่ใน UI พร้อมชื่อ user ที่คอมเมนต์
           const commentList = postCard.querySelector(".comment-list");
           const p = document.createElement("p");
           p.className = "comment";
           p.innerHTML = `<b>${data.username}:</b> <span class="comment-text">${data.text}</span>`;
           commentList.appendChild(p);
           
-          // อัพเดทจำนวนคอมเมนต์
           const commentCount = postCard.querySelector(".comment-count");
           commentCount.innerText = data.comment_count;
           
-          // ล้าง input
           input.value = "";
           
-          // แสดง comment list
           commentList.style.display = "block";
         }
       } catch (error) {

@@ -8,8 +8,6 @@ from werkzeug.security import generate_password_hash, check_password_hash
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'static/uploads'
 app.secret_key = 'brand_new_secret_key_xyz123'
-
-# ตั้งค่า Session
 app.config['SESSION_TYPE'] = 'filesystem'
 app.config['SESSION_PERMANENT'] = False
 app.config['SESSION_FILE_DIR'] = './flask_session'
@@ -17,11 +15,9 @@ Session(app)
 
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# สร้างฐานข้อมูล DuckDB
 DB_FILE = 'database.duckdb'
 conn = duckdb.connect(DB_FILE)
 
-# สร้าง SEQUENCE และตารางถ้ายังไม่มี
 try:
     conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_users_id START 1")
     conn.execute("CREATE SEQUENCE IF NOT EXISTS seq_posts_id START 1")
@@ -72,10 +68,9 @@ except:
 
 conn.close()
 
-# ตรวจสอบการล็อกอินก่อนเข้าหน้าอื่น
 @app.before_request
 def check_session():
-     if request.endpoint not in ['login', 'register', 'static', 'clear_session', 'index']:
+     if request.endpoint not in ['login', 'register', 'static', 'index']:
         if 'user' not in session:
             flash("กรุณาเข้าสู่ระบบก่อนเข้าหน้านี้")
             return redirect(url_for('login'))
@@ -84,48 +79,6 @@ def check_session():
 def index():
     session.clear()
     return redirect(url_for('login'))
-
-@app.route('/clear')
-def clear_session():
-    session.clear()
-    flash("เคลียร์ session แล้ว")
-    return redirect(url_for('login'))
-
-@app.route('/api/delete_post/<int:post_id>', methods=['DELETE'])
-def delete_post(post_id):
-    if 'user' not in session:
-        return jsonify({'success': False, 'error': 'ไม่ได้ล็อกอิน'}), 401
-    
-    username = session['user']
-    conn = duckdb.connect(DB_FILE)
-    
-    # ตรวจสอบว่าโพสต์เป็นของผู้ใช้หรือไม่
-    post = conn.execute("SELECT user, file FROM posts WHERE id = ?", [post_id]).fetchone()
-    
-    if not post:
-        conn.close()
-        return jsonify({'success': False, 'error': 'ไม่พบโพสต์'}), 404
-    
-    if post[0] != username:
-        conn.close()
-        return jsonify({'success': False, 'error': 'คุณไม่มีสิทธิ์ลบโพสต์นี้'}), 403
-    
-    # ลบไฟล์ที่แนบมา (ถ้ามี)
-    if post[1]:
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], post[1])
-        if os.path.exists(file_path):
-            try:
-                os.remove(file_path)
-            except:
-                pass
-    
-    # ลบข้อมูลที่เกี่ยวข้องกับโพสต์
-    conn.execute("DELETE FROM comments WHERE post_id = ?", [post_id])
-    conn.execute("DELETE FROM likes WHERE post_id = ?", [post_id])
-    conn.execute("DELETE FROM posts WHERE id = ?", [post_id])
-    conn.close()
-    
-    return jsonify({'success': True})
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -196,7 +149,6 @@ def home():
         conn.close()
         return redirect(url_for('home'))
 
-    # ดึงข้อมูล posts พร้อมกับข้อมูล likes และ comments
     data = conn.execute("SELECT * FROM posts ORDER BY timestamp DESC").fetchall()
     
     posts = []
@@ -205,14 +157,11 @@ def home():
     for s in data:
         post_id = s[0]
         
-        # นับจำนวนไลค์
         like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
         
-        # เช็คว่า user ปัจจุบันกดไลค์ไว้หรือยัง
         user_liked = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ? AND username = ?", 
                                    [post_id, current_user]).fetchone()[0] > 0
         
-        # นับจำนวนคอมเมนต์
         comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
         
         posts.append({
@@ -233,7 +182,39 @@ def home():
 
     return render_template("index.html", posts=posts, user=current_user)
 
-# API: กดไลค์/เลิกไลค์
+@app.route('/api/delete_post/<int:post_id>', methods=['DELETE'])
+def delete_post(post_id):
+    if 'user' not in session:
+        return jsonify({'success': False, 'error': 'ไม่ได้ล็อกอิน'}), 401
+    
+    username = session['user']
+    conn = duckdb.connect(DB_FILE)
+    
+    post = conn.execute("SELECT user, file FROM posts WHERE id = ?", [post_id]).fetchone()
+    
+    if not post:
+        conn.close()
+        return jsonify({'success': False, 'error': 'ไม่พบโพสต์'}), 404
+    
+    if post[0] != username:
+        conn.close()
+        return jsonify({'success': False, 'error': 'คุณไม่มีสิทธิ์ลบโพสต์นี้'}), 403
+    
+    if post[1]:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], post[1])
+        if os.path.exists(file_path):
+            try:
+                os.remove(file_path)
+            except:
+                pass
+    
+    conn.execute("DELETE FROM comments WHERE post_id = ?", [post_id])
+    conn.execute("DELETE FROM likes WHERE post_id = ?", [post_id])
+    conn.execute("DELETE FROM posts WHERE id = ?", [post_id])
+    conn.close()
+    
+    return jsonify({'success': True})
+
 @app.route('/api/like/<int:post_id>', methods=['POST'])
 def toggle_like(post_id):
     if 'user' not in session:
@@ -242,27 +223,22 @@ def toggle_like(post_id):
     username = session['user']
     conn = duckdb.connect(DB_FILE)
     
-    # เช็คว่ากดไลค์ไว้แล้วหรือยัง
     existing = conn.execute("SELECT * FROM likes WHERE post_id = ? AND username = ?", 
                            [post_id, username]).fetchone()
     
     if existing:
-        # ถ้ากดไว้แล้ว ให้เลิกไลค์
         conn.execute("DELETE FROM likes WHERE post_id = ? AND username = ?", [post_id, username])
         liked = False
     else:
-        # ถ้ายังไม่กด ให้เพิ่มไลค์
         conn.execute("INSERT INTO likes (post_id, username, timestamp) VALUES (?, ?, ?)",
                     [post_id, username, datetime.now()])
         liked = True
     
-    # นับจำนวนไลค์ใหม่
     like_count = conn.execute("SELECT COUNT(*) FROM likes WHERE post_id = ?", [post_id]).fetchone()[0]
     conn.close()
     
     return jsonify({'success': True, 'liked': liked, 'like_count': like_count})
 
-# API: ดึงคอมเมนต์ทั้งหมดของโพสต์
 @app.route('/api/comments/<int:post_id>', methods=['GET'])
 def get_comments(post_id):
     conn = duckdb.connect(DB_FILE)
@@ -280,7 +256,6 @@ def get_comments(post_id):
     
     return jsonify({'success': True, 'comments': result})
 
-# API: เพิ่มคอมเมนต์ใหม่
 @app.route('/api/comment/<int:post_id>', methods=['POST'])
 def add_comment(post_id):
     if 'user' not in session:
@@ -295,13 +270,11 @@ def add_comment(post_id):
     username = session['user']
     conn = duckdb.connect(DB_FILE)
     
-    # เพิ่มคอมเมนต์ลง database
     conn.execute(
         "INSERT INTO comments (post_id, username, comment_text, timestamp) VALUES (?, ?, ?, ?)",
         [post_id, username, comment_text, datetime.now()]
     )
     
-    # นับจำนวนคอมเมนต์ใหม่
     comment_count = conn.execute("SELECT COUNT(*) FROM comments WHERE post_id = ?", [post_id]).fetchone()[0]
     conn.close()
     
@@ -363,7 +336,6 @@ def math():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['math']).fetchall()
     
     posts = []
@@ -408,7 +380,6 @@ def physics():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['physics']).fetchall()
     
     posts = []
@@ -453,7 +424,6 @@ def biology():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['biology']).fetchall()
     
     posts = []
@@ -498,7 +468,6 @@ def chemistry():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['chemistry']).fetchall()
     
     posts = []
@@ -543,7 +512,6 @@ def history():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['history']).fetchall()
     
     posts = []
@@ -588,7 +556,6 @@ def thai():
     }
     
     conn = duckdb.connect(DB_FILE)
-    # ดึงเฉพาะโพสต์ที่เป็นหมวดหมู่ math
     data = conn.execute("SELECT * FROM posts WHERE category = ? ORDER BY timestamp DESC", ['thai']).fetchall()
     
     posts = []
@@ -641,7 +608,6 @@ def setting():
             conn.close()
             return redirect(url_for('set'))
         
-        # ตรวจสอบรหัสผ่านปัจจุบัน
         if not check_password_hash(user[2], current_password):
             flash("รหัสผ่านปัจจุบันไม่ถูกต้อง")
             conn.close()
@@ -651,7 +617,6 @@ def setting():
             response.headers['Expires'] = '0'
             return response
         
-        # ตรวจสอบรหัสผ่านใหม่ตรงกันหรือไม่
         if new_password != confirm_password:
             flash("รหัสผ่านใหม่ไม่ตรงกัน")
             conn.close()
@@ -661,7 +626,6 @@ def setting():
             response.headers['Expires'] = '0'
             return response
         
-        # ตรวจสอบว่าชื่อผู้ใช้ใหม่ซ้ำกับคนอื่นหรือไม่
         if new_username != current_username:
             existing = conn.execute("SELECT * FROM users WHERE username = ?", [new_username]).fetchone()
             if existing:
@@ -673,27 +637,21 @@ def setting():
                 response.headers['Expires'] = '0'
                 return response
         
-        # อัปเดตข้อมูล
         hashed_pw = generate_password_hash(new_password)
         
         try:
-            # อัปเดต username และ password
             conn.execute("UPDATE users SET username = ?, password = ? WHERE username = ?", 
                         [new_username, hashed_pw, current_username])
             
-            # อัปเดต username ในตาราง posts
             conn.execute("UPDATE posts SET user = ? WHERE user = ?", 
                         [new_username, current_username])
             
-            # อัปเดต username ในตาราง likes
             conn.execute("UPDATE likes SET username = ? WHERE username = ?", 
                         [new_username, current_username])
             
-            # อัปเดต username ในตาราง comments
             conn.execute("UPDATE comments SET username = ? WHERE username = ?", 
                         [new_username, current_username])
             
-            # อัปเดต session
             session['user'] = new_username
             
             flash("อัปเดตข้อมูลสำเร็จ")
@@ -722,4 +680,4 @@ def logout():
     return response
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    app.run(host="0.0.0.0", port=5500, debug=True)
